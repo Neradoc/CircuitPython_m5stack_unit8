@@ -1,14 +1,22 @@
 # SPDX-FileCopyrightText: Copyright 2023 Neradoc, https://neradoc.me
 # SPDX-License-Identifier: MIT
 
+"""
+Dev notes: the board expects a stop between writ and read rather than a real restart,
+so we cannot use "write_then_readinto", but a write followed by a read.
+"""
+
+
 from micropython import const
 from adafruit_bus_device.i2c_device import I2CDevice
+import struct
 
 _DEFAULT_ADDRESS = const(0x41)
 _ENCODER_REGISTER = const(0x00)
 _INCREMENT_REGISTER = const(0x20)
 _ENCODER_RESET_REGISTER = const(0x40)
 _BUTTONS_REGISTER = const(0x50)
+_SWITCH_REGISTER = const(0x60)
 _PIXELS_REGISTER = const(0x70)
 
 """
@@ -85,7 +93,7 @@ class Unit8Encoder:
                 self.register[0] = 0x50 + bnum
                 bus.write(self.register)
                 bus.readinto(self.buffer, start=bnum, end=bnum+1)
-        return tuple(bool(b) for b in struct.unpack("<8B", self.buffer))
+        return tuple(bool(b) for b in struct.unpack("<8B", self.buffer[:8]))
 
     def set_led(self, position, color):
         """Set the color to one RGB LED"""
@@ -98,30 +106,38 @@ class Unit8Encoder:
             color = color.to_bytes(3, "big")
         else:
             raise ValueError("color must be an int or (r,g,b) tuple")
+        self.buffer[0] = _PIXELS_REGISTER + 3 * position
+        self.buffer[1:4] = color
         with self.device as bus:
-            for pos in range(3):
-                self.buffer[0] = register + pos
-                self.buffer[1] = color[pos]
-                bus.write(self.buffer, end=2)
+            bus.write(self.buffer, end=4)
 
     def get_led(self, position):
         """Get the current color of an RGB LED"""
         if position not in range(0,8):
             raise ValueError(f"pixel position must be one of 0-7")
-        register = _PIXELS_REGISTER + 3 * position
+        self.register[0] = _PIXELS_REGISTER + 3 * position
         with self.device as bus:
-            for pos in range(3):
-                self.buffer[0] = register + pos
-                bus.write(self.buffer, end=1)
-                bus.read(self.buffer, start=pos+1)
-        return tuple(self.buffer[1:4])
+            bus.write(self.register)
+            bus.read(self.buffer, end=3)
+        return tuple(self.buffer[:3])
+
+    def read_switch(self):
+        """Read the value of the switch"""
+        self.register[0] = _SWITCH_REGISTER
+        with self.device as bus:
+            bus.write(self.register)
+            bus.readinto(self.buffer, end=1)
+        return bool(self.buffer[0])
 
     def fill(self, color):
         for i in range(8):
             self.set_led(i, color)
 
+# This is a version without self.buffer
+class Unit8Encoder_Bis:
+    def __init__(self, i2c, address=_DEFAULT_ADDRESS):
+        self.device = I2CDevice(i2c, address)
 
-class Alternate:
     def read_encoders(self):
         register = bytearray(1)
         buffer = bytearray(4*8)
@@ -144,7 +160,7 @@ class Alternate:
     def read_buttons(self):
         register = bytearray(1)
         buffer = bytearray(8)
-        with device as bus:
+        with self.device as bus:
             for bnum in range(8):
                 register[0] = 0x50 + bnum
                 bus.write(register)
@@ -161,12 +177,9 @@ class Alternate:
         else:
             raise ValueError("color must be an int or (r,g,b) tuple")
         register = _PIXELS_REGISTER + 3 * position
-        buffer = bytearray(2)
+        buffer = bytes([register]) + color
         with self.device as bus:
-            for pos in range(3):
-                buffer[0] = register + pos
-                buffer[1] = color[pos]
-                bus.write(buffer, end=2)
+            bus.write(buffer)
 
     def fill(self, color):
         for i in range(8):
@@ -180,6 +193,8 @@ if __name__ == "__main__":
     encoder = Unit8Encoder(i2c)
     while True:
         print(encoder.read_encoders())
+        print(encoder.read_buttons())
+        print(encoder.read_switch())
         encoder.set_led(0, (255,0,0))
         time.sleep(1)
 
