@@ -10,6 +10,7 @@ so we cannot use "write_then_readinto", but a write followed by a read.
 from micropython import const
 from adafruit_bus_device.i2c_device import I2CDevice
 import struct
+from adafruit_pixelbuf import PixelBuf
 
 _DEFAULT_ADDRESS = const(0x41)
 _ENCODER_REGISTER = const(0x00)
@@ -22,23 +23,25 @@ _PIXELS_REGISTER = const(0x70)
 """
 TODO: the goal is to have a neopixel-compatible interface to setting the LEDs.
 A pixel object that can have colors assigned to inidexes, buffers the data,
-has a auto_srite = False mode and show() method, and brightness calculations.
+has a auto_write = False mode and show() method, and brightness calculations.
 Should be easy by subclassing PixelBuf like I did with seesaw
 https://github.com/adafruit/Adafruit_CircuitPython_seesaw/blob/main/adafruit_seesaw/neopixel.py
 """
-class _U8_Pixels:
-    def __init__(self, unit):
-        self.unit = unit
-    def __set_item__(index, color):
-        ...
-    def __get_item__(index):
-        ...
+class _U8_Pixels(PixelBuf):
+    def __init__(self, unit8, brightness):
+        self.unit8 = unit8
+        super().__init__(8, byteorder="RGB", brightness=brightness)
+
+    def _transmit(self, buffer: bytearray) -> None:
+        """Update the pixels"""
+        self.unit8._set_leds(buffer)
 
 class Unit8Encoder:
-    def __init__(self, i2c, address=_DEFAULT_ADDRESS):
+    def __init__(self, i2c, address=_DEFAULT_ADDRESS, brightness=1.0):
         self.device = I2CDevice(i2c, address)
         self.register = bytearray(1)
         self.buffer = bytearray(4 * 8)
+        self.pixels = _U8_Pixels(self, brightness)
 
     def read_encoder(self, num):
         """Return the value of one encoder"""
@@ -121,6 +124,12 @@ class Unit8Encoder:
             bus.read(self.buffer, end=3)
         return tuple(self.buffer[:3])
 
+    def _set_leds(self, buffer):
+        """Set all LEDs with a binary buffer"""
+        self.register[0] = _PIXELS_REGISTER
+        with self.device as bus:
+            bus.write(self.register + buffer)
+
     def read_switch(self):
         """Read the value of the switch"""
         self.register[0] = _SWITCH_REGISTER
@@ -176,8 +185,8 @@ class Unit8Encoder_Bis:
             color = color.to_bytes(3, "big")
         else:
             raise ValueError("color must be an int or (r,g,b) tuple")
-        register = _PIXELS_REGISTER + 3 * position
-        buffer = bytes([register]) + color
+        register = bytes([_PIXELS_REGISTER + 3 * position])
+        buffer = register + color
         with self.device as bus:
             bus.write(buffer)
 
