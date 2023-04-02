@@ -30,7 +30,7 @@ class Unit8Encoder:
     def __init__(self, i2c, address=_DEFAULT_ADDRESS):
         self.device = I2CDevice(i2c, address)
         self.register = bytearray(1)
-        self.buffer = bytearray(4*8)
+        self.buffer = bytearray(4 * 8)
 
     def read_encoder(self, num):
         """Return the value of one encoder"""
@@ -101,7 +101,7 @@ class Unit8Encoder:
         with self.device as bus:
             for pos in range(3):
                 self.buffer[0] = register + pos
-                self.buffer[1] = color[pos:pos+1]
+                self.buffer[1] = color[pos]
                 bus.write(self.buffer, end=2)
 
     def get_led(self, position):
@@ -115,6 +115,10 @@ class Unit8Encoder:
                 bus.write(self.buffer, end=1)
                 bus.read(self.buffer, start=pos+1)
         return tuple(self.buffer[1:4])
+
+    def fill(self, color):
+        for i in range(8):
+            self.set_led(i, color)
 
 
 class Alternate:
@@ -145,7 +149,7 @@ class Alternate:
                 register[0] = 0x50 + bnum
                 bus.write(register)
                 bus.readinto(buffer, start=bnum, end=bnum+1)
-        return struct.unpack("<8?", buffer)
+        return struct.unpack("<8B", buffer)
 
     def set_led(self, position, color):
         if position not in range(0,8):
@@ -161,7 +165,7 @@ class Alternate:
         with self.device as bus:
             for pos in range(3):
                 buffer[0] = register + pos
-                buffer[1] = color[pos:pos+1]
+                buffer[1] = color[pos]
                 bus.write(buffer, end=2)
 
     def fill(self, color):
