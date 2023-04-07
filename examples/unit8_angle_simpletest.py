@@ -30,7 +30,6 @@ while True:
         colors = [colorwheel(x) for x in positions_8b]
         try:
             angles.pixels[:] = colors
-            # angles.pixels.show()
         except OSError as er:
-            print("SHOW", er)
+            print(er)
     time.sleep(.1)

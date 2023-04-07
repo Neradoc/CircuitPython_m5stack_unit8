@@ -19,20 +19,20 @@ _SWITCH_REGISTER = const(0x60)
 _PIXELS_REGISTER = const(0x70)
 
 class _U8_Pixels(PixelBuf):
-    def __init__(self, unit8, brightness):
+    def __init__(self, unit8, brightness, auto_write):
         self.unit8 = unit8
-        super().__init__(8, byteorder="RGB", brightness=brightness)
+        super().__init__(8, byteorder="RGB", brightness=brightness, auto_write=auto_write)
 
     def _transmit(self, buffer: bytearray) -> None:
         """Update the pixels"""
         self.unit8._set_leds(buffer)
 
 class Unit8Encoder:
-    def __init__(self, i2c, address=_DEFAULT_ADDRESS, brightness=1.0):
+    def __init__(self, i2c, address=_DEFAULT_ADDRESS, brightness=1.0, auto_write=True):
         self.device = I2CDevice(i2c, address)
         self.register = bytearray(1)
         self.buffer = bytearray(4 * 8)
-        self.pixels = _U8_Pixels(self, brightness)
+        self.pixels = _U8_Pixels(self, brightness, auto_write)
 
     def read_encoder(self, num):
         """Return the value of one encoder"""

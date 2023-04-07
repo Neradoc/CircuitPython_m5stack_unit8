@@ -6,6 +6,7 @@ import time
 
 i2c = board.STEMMA_I2C()
 encoder = Unit8Encoder(i2c, brightness=0.2)
+
 state = None
 button_status = [True] * 8
 led_status = [True] * 8
@@ -25,7 +26,7 @@ while True:
             encoder.pixels.brightness = 1
         else:
             encoder.pixels.brightness = 0.2
-        if buttons[-1] and button[1]:
+        if buttons[0] and buttons[-1]:
             encoder.reset()
         for i in range(8):
             if button_status[i] != buttons[i]:
@@ -38,5 +39,4 @@ while True:
             for i,x in enumerate(positions)
         ]
         encoder.pixels[:] = colors
-        encoder.pixels.show()
     time.sleep(.1)
