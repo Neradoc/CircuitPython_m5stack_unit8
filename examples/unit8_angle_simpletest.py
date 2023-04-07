@@ -14,9 +14,9 @@ led_status = [True] * 8
 
 while True:
     # this is the 12 bits positions
-    positions = angles.read_angles()
+    positions = angles.angles
     # read 8 bit angles, hopefully more stable
-    positions_8b = angles.read_8bit_angles()
+    positions_8b = angles.angles_8bits
     switch = angles.switch
     if (positions_8b, switch) != state:
         state = (positions_8b, switch)

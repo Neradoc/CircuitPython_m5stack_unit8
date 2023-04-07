@@ -12,8 +12,8 @@ button_status = [True] * 8
 led_status = [True] * 8
 
 while True:
-    positions = encoder.read_encoders()
-    increments = encoder.read_increments()
+    positions = encoder.encoders
+    increments = encoder.increments
     buttons = encoder.buttons
     switch = encoder.switch
     if (positions, increments, buttons, switch) != state:
@@ -27,7 +27,7 @@ while True:
         else:
             encoder.pixels.brightness = 0.2
         if buttons[0] and buttons[-1]:
-            encoder.reset()
+            encoder.reset_encoders()
         for i in range(8):
             if button_status[i] != buttons[i]:
                 button_status[i] = buttons[i]

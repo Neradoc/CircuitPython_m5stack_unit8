@@ -38,7 +38,7 @@ class Unit8Encoder:
         self.buffer = bytearray(4 * 8)
         self.pixels = _U8_Pixels(self, brightness, auto_write)
 
-    def read_encoder(self, num):
+    def get_encoder(self, num):
         """Return the value of one encoder"""
         if num not in range(0, 8):
             raise ValueError(f"num must be one of 0-7")
@@ -48,7 +48,8 @@ class Unit8Encoder:
             bus.readinto(self.buffer, end=4)
         return struct.unpack("<l", self.buffer[:4])[0]
 
-    def read_encoders(self):
+    @property
+    def encoders(self):
         """Return a list with the values of the 8 encoders"""
         with self.device as bus:
             for enc_num in range(8):
@@ -57,7 +58,7 @@ class Unit8Encoder:
                 bus.readinto(self.buffer, start=enc_num * 4, end=(enc_num + 1) * 4)
         return struct.unpack("<8l", self.buffer)
 
-    def read_increment(self, num):
+    def get_increment(self, num):
         """
         Return the value of one encoder increment.
         This value is reset to 0 after read.
@@ -70,7 +71,8 @@ class Unit8Encoder:
             bus.readinto(self.buffer, end=4)
         return struct.unpack("<l", self.buffer[:4])[0]
 
-    def read_increments(self):
+    @property
+    def increments(self):
         """
         Return a list with the values of the 8 encoders.
         These value is reset to 0 after read.
@@ -82,7 +84,7 @@ class Unit8Encoder:
                 bus.readinto(self.buffer, start=enc_num * 4, end=(enc_num + 1) * 4)
         return struct.unpack("<8l", self.buffer)
 
-    def reset(self):
+    def reset_encoders(self):
         """Reset the encoder position values"""
         self.buffer[1] = 1
         with self.device as bus:

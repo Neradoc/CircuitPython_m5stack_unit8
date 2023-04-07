@@ -18,6 +18,9 @@ _ANGLE_8BITS_REGISTER = const(0x10)
 _SWITCH_REGISTER = const(0x20)
 _PIXELS_REGISTER = const(0x30)
 
+PRECISION_8BITS = 8
+PRECISION_12BITS = 12
+PRECISIONS = (PRECISION_8BITS, PRECISION_12BITS)
 
 class _U8_Pixels(PixelBuf):
     def __init__(self, unit8, brightness, auto_write):
@@ -32,27 +35,46 @@ class _U8_Pixels(PixelBuf):
 
 
 class Unit8Angle:
-    def __init__(self, i2c, address=_DEFAULT_ADDRESS, brightness=1.0, auto_write=True):
+    def __init__(self, i2c, precision=PRECISION_12BITS, address=_DEFAULT_ADDRESS, brightness=1.0, auto_write=True):
         self.device = I2CDevice(i2c, address)
         self.register = bytearray(1)
         self.buffer = bytearray(2 * 8)
         self.pixels = _U8_Pixels(self, brightness, auto_write)
+        self._precision = PRECISION_8BITS
+        self.precision = precision
 
-    def read_angle(self, num):
+    @property
+    def precision(self):
+        return self._precision
+
+    @precision.setter
+    def precision(self, value):
+        if value not in PRECISIONS:
+            raise ValueError(f"Precision must be one of {PRECISIONS}")
+        self._precision = value
+
+    def get_angle(self, num):
         """
         Return the value of one encoder.
         Values are adjusted to be 16 bits: 0-65535.
         """
-        return (self.read_12bit_angle(num) * 0xFFFF) // 0xFFF
+        if self._precision == PRECISION_8BITS
+            return (self.get_8bit_angle(num) * 0xFFFF) // 0xFF
+        else:
+            return (self.get_12bit_angle(num) * 0xFFFF) // 0xFFF
 
-    def read_angles(self):
+    @property
+    def angles(self):
         """
         Return a list with the values of the 8 encoders.
         Values are adjusted to be 16 bits: 0-65535.
         """
-        return tuple((byte * 0xFFFF) // 0xFFF for byte in self.read_12bit_angles())
+        if self._precision == PRECISION_8BITS
+            return tuple((byte * 0xFFFF) // 0xFF for byte in self.angles_8bit)
+        else:
+            return tuple((byte * 0xFFFF) // 0xFFF for byte in self.angles_12bit)
 
-    def read_12bit_angle(self, num):
+    def get_angle_12bit(self, num):
         """Return the raw 12 bits value (0-4095) of one encoder"""
         if num not in range(0, 8):
             raise ValueError(f"num must be one of 0-7")
@@ -62,7 +84,8 @@ class Unit8Angle:
             bus.readinto(self.buffer, end=2)
         return struct.unpack("<H", self.buffer[:2])[0]
 
-    def read_12bit_angles(self):
+    @property
+    def angles_12bit(self):
         """Return a list with the raw 12 bits values (0-4095) of the 8 encoders"""
         with self.device as bus:
             for num in range(8):
@@ -71,7 +94,7 @@ class Unit8Angle:
                 bus.readinto(self.buffer, start=num * 2, end=(num + 1) * 2)
         return struct.unpack("<8H", self.buffer)
 
-    def read_8bit_angle(self, num):
+    def get_angle_8bit(self, num):
         """Return the raw 8 bits value (0-255) of one encoder"""
         if num not in range(0, 8):
             raise ValueError(f"num must be one of 0-7")
@@ -81,7 +104,8 @@ class Unit8Angle:
             bus.readinto(self.buffer, end=1)
         return struct.unpack("<B", self.buffer[:2])[0]
 
-    def read_8bit_angles(self):
+    @property
+    def angles_8bit(self):
         """Return a list with the raw 8 bits values (0-255) of the 8 encoders"""
         with self.device as bus:
             for num in range(8):
