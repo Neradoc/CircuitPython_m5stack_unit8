@@ -90,8 +90,9 @@ class Unit8Angle:
                 bus.readinto(self.buffer, start=num, end=num + 1)
         return struct.unpack("<8B", self.buffer[:8])
 
-    def read_switch(self):
-        """Read the state of the switch"""
+    @property
+    def switch(self):
+        """The state of the switch"""
         self.register[0] = _SWITCH_REGISTER
         with self.device as bus:
             bus.write(self.register)

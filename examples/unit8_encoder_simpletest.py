@@ -14,8 +14,8 @@ led_status = [True] * 8
 while True:
     positions = encoder.read_encoders()
     increments = encoder.read_increments()
-    buttons = encoder.read_buttons()
-    switch = encoder.read_switch()
+    buttons = encoder.buttons
+    switch = encoder.switch
     if (positions, increments, buttons, switch) != state:
         state = (positions, increments, buttons, switch)
         print("-" * 70)

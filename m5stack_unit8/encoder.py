@@ -90,14 +90,24 @@ class Unit8Encoder:
                 self.buffer[0] = 0x40 + i
                 bus.write(self.buffer, end=2)
 
-    def read_buttons(self):
-        """Return a tuple with all the button values"""
+    @property
+    def buttons(self):
+        """A tuple with all the button values"""
         with self.device as bus:
             for bnum in range(8):
                 self.register[0] = 0x50 + bnum
                 bus.write(self.register)
                 bus.readinto(self.buffer, start=bnum, end=bnum + 1)
         return tuple(not b for b in struct.unpack("<8B", self.buffer[:8]))
+
+    @property
+    def switch(self):
+        """The value of the switch"""
+        self.register[0] = _SWITCH_REGISTER
+        with self.device as bus:
+            bus.write(self.register)
+            bus.readinto(self.buffer, end=1)
+        return bool(self.buffer[0])
 
     def set_led(self, position, color):
         """Set the color to one RGB LED"""
@@ -130,14 +140,6 @@ class Unit8Encoder:
         self.register[0] = _PIXELS_REGISTER
         with self.device as bus:
             bus.write(self.register + buffer)
-
-    def read_switch(self):
-        """Read the value of the switch"""
-        self.register[0] = _SWITCH_REGISTER
-        with self.device as bus:
-            bus.write(self.register)
-            bus.readinto(self.buffer, end=1)
-        return bool(self.buffer[0])
 
     def fill(self, color):
         self.pixels.fill(color)

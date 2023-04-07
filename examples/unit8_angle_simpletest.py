@@ -17,7 +17,7 @@ while True:
     positions = angles.read_angles()
     # read 8 bit angles, hopefully more stable
     positions_8b = angles.read_8bit_angles()
-    switch = angles.read_switch()
+    switch = angles.switch
     if (positions_8b, switch) != state:
         state = (positions_8b, switch)
         print("-" * 70)
