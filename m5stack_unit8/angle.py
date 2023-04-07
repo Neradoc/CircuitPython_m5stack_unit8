@@ -39,15 +39,21 @@ class Unit8Angle:
         self.pixels = _U8_Pixels(self, brightness, auto_write)
 
     def read_angle(self, num):
-        """Return the value of one encoder"""
-        return (self.read_12bit_angle(num) * 65535) // 4095
+        """
+        Return the value of one encoder.
+        Values are adjusted to be 16 bits: 0-65535.
+        """
+        return (self.read_12bit_angle(num) * 0xFFFF) // 0xFFF
 
     def read_angles(self):
-        """Return a list with the values of the 8 encoders"""
-        return tuple((byte * 65535) // 4095 for byte in self.read_12bit_angles())
+        """
+        Return a list with the values of the 8 encoders.
+        Values are adjusted to be 16 bits: 0-65535.
+        """
+        return tuple((byte * 0xFFFF) // 0xFFF for byte in self.read_12bit_angles())
 
     def read_12bit_angle(self, num):
-        """Return the value of one encoder"""
+        """Return the raw 12 bits value (0-4095) of one encoder"""
         if num not in range(0, 8):
             raise ValueError(f"num must be one of 0-7")
         self.register[0] = _ANGLE_12BITS_REGISTER + num * 2
@@ -57,7 +63,7 @@ class Unit8Angle:
         return struct.unpack("<H", self.buffer[:2])[0]
 
     def read_12bit_angles(self):
-        """Return a list with the values of the 8 encoders"""
+        """Return a list with the raw 12 bits values (0-4095) of the 8 encoders"""
         with self.device as bus:
             for num in range(8):
                 self.register[0] = _ANGLE_12BITS_REGISTER + num * 2
@@ -66,7 +72,7 @@ class Unit8Angle:
         return struct.unpack("<8H", self.buffer)
 
     def read_8bit_angle(self, num):
-        """Return the value of one encoder"""
+        """Return the raw 8 bits value (0-255) of one encoder"""
         if num not in range(0, 8):
             raise ValueError(f"num must be one of 0-7")
         self.register[0] = _ANGLE_8BITS_REGISTER + num
@@ -76,7 +82,7 @@ class Unit8Angle:
         return struct.unpack("<B", self.buffer[:2])[0]
 
     def read_8bit_angles(self):
-        """Return a list with the values of the 8 encoders"""
+        """Return a list with the raw 8 bits values (0-255) of the 8 encoders"""
         with self.device as bus:
             for num in range(8):
                 self.register[0] = _ANGLE_8BITS_REGISTER + num
@@ -85,7 +91,7 @@ class Unit8Angle:
         return struct.unpack("<8B", self.buffer[:8])
 
     def read_switch(self):
-        """Read the value of the switch"""
+        """Read the state of the switch"""
         self.register[0] = _SWITCH_REGISTER
         with self.device as bus:
             bus.write(self.register)
