@@ -18,14 +18,18 @@ _ANGLE_8BITS_REGISTER = const(0x10)
 _SWITCH_REGISTER = const(0x20)
 _PIXELS_REGISTER = const(0x30)
 
+
 class _U8_Pixels(PixelBuf):
     def __init__(self, unit8, brightness, auto_write):
         self.unit8 = unit8
-        super().__init__(8, byteorder="RGB", brightness=brightness, auto_write=auto_write)
+        super().__init__(
+            8, byteorder="RGB", brightness=brightness, auto_write=auto_write
+        )
 
     def _transmit(self, buffer: bytearray) -> None:
         """Update the pixels"""
         self.unit8._set_leds(buffer)
+
 
 class Unit8Angle:
     def __init__(self, i2c, address=_DEFAULT_ADDRESS, brightness=1.0, auto_write=True):
@@ -44,7 +48,7 @@ class Unit8Angle:
 
     def read_12bit_angle(self, num):
         """Return the value of one encoder"""
-        if num not in range(0,8):
+        if num not in range(0, 8):
             raise ValueError(f"num must be one of 0-7")
         self.register[0] = _ANGLE_12BITS_REGISTER + num * 2
         with self.device as bus:
@@ -58,12 +62,12 @@ class Unit8Angle:
             for num in range(8):
                 self.register[0] = _ANGLE_12BITS_REGISTER + num * 2
                 bus.write(self.register)
-                bus.readinto(self.buffer, start=num*2, end=(num+1)*2)
+                bus.readinto(self.buffer, start=num * 2, end=(num + 1) * 2)
         return struct.unpack("<8H", self.buffer)
 
     def read_8bit_angle(self, num):
         """Return the value of one encoder"""
-        if num not in range(0,8):
+        if num not in range(0, 8):
             raise ValueError(f"num must be one of 0-7")
         self.register[0] = _ANGLE_8BITS_REGISTER + num
         with self.device as bus:
@@ -77,7 +81,7 @@ class Unit8Angle:
             for num in range(8):
                 self.register[0] = _ANGLE_8BITS_REGISTER + num
                 bus.write(self.register)
-                bus.readinto(self.buffer, start=num, end=num+1)
+                bus.readinto(self.buffer, start=num, end=num + 1)
         return struct.unpack("<8B", self.buffer[:8])
 
     def read_switch(self):
@@ -90,7 +94,7 @@ class Unit8Angle:
 
     def set_led(self, position, color, brightness=0xFF):
         """Set the color to one RGB LED"""
-        if position not in range(0,8):
+        if position not in range(0, 8):
             raise ValueError(f"pixel position must be one of 0-7")
         if isinstance(color, (tuple, list)) and len(color) == 3:
             color = bytes(color)
@@ -106,7 +110,7 @@ class Unit8Angle:
 
     def get_led(self, position):
         """Get the current color of an RGB LED"""
-        if position not in range(0,8):
+        if position not in range(0, 8):
             raise ValueError(f"pixel position must be one of 0-7")
         self.register[0] = _PIXELS_REGISTER + 4 * position
         with self.device as bus:
@@ -118,7 +122,7 @@ class Unit8Angle:
         """Set all LEDs with a binary buffer"""
         for led in range(8):
             self.buffer[0] = _PIXELS_REGISTER + led * 4
-            self.buffer[1:4] = buffer[led*3:(led+1)*3]
+            self.buffer[1:4] = buffer[led * 3 : (led + 1) * 3]
             self.buffer[4] = 0xFF
             with self.device as bus:
                 bus.write(self.buffer, end=6)

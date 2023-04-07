@@ -20,7 +20,7 @@ while True:
     switch = angles.read_switch()
     if (positions_8b, switch) != state:
         state = (positions_8b, switch)
-        print("-"*70)
+        print("-" * 70)
         print(positions, switch)
         if switch:
             angles.pixels.brightness = 1
@@ -32,4 +32,4 @@ while True:
             angles.pixels[:] = colors
         except OSError as er:
             print(er)
-    time.sleep(.1)
+    time.sleep(0.1)

@@ -18,7 +18,7 @@ while True:
     switch = encoder.read_switch()
     if (positions, increments, buttons, switch) != state:
         state = (positions, increments, buttons, switch)
-        print("-"*70)
+        print("-" * 70)
         print(positions)
         print(increments)
         print(buttons, switch)
@@ -34,9 +34,8 @@ while True:
                 if buttons[i]:
                     led_status[i] = not led_status[i]
         colors = [
-            int(led_status[i])
-            * colorwheel((2 * x) % 256 + 256)
-            for i,x in enumerate(positions)
+            int(led_status[i]) * colorwheel((2 * x) % 256 + 256)
+            for i, x in enumerate(positions)
         ]
         encoder.pixels[:] = colors
-    time.sleep(.1)
+    time.sleep(0.1)

@@ -18,14 +18,18 @@ _BUTTONS_REGISTER = const(0x50)
 _SWITCH_REGISTER = const(0x60)
 _PIXELS_REGISTER = const(0x70)
 
+
 class _U8_Pixels(PixelBuf):
     def __init__(self, unit8, brightness, auto_write):
         self.unit8 = unit8
-        super().__init__(8, byteorder="RGB", brightness=brightness, auto_write=auto_write)
+        super().__init__(
+            8, byteorder="RGB", brightness=brightness, auto_write=auto_write
+        )
 
     def _transmit(self, buffer: bytearray) -> None:
         """Update the pixels"""
         self.unit8._set_leds(buffer)
+
 
 class Unit8Encoder:
     def __init__(self, i2c, address=_DEFAULT_ADDRESS, brightness=1.0, auto_write=True):
@@ -36,7 +40,7 @@ class Unit8Encoder:
 
     def read_encoder(self, num):
         """Return the value of one encoder"""
-        if num not in range(0,8):
+        if num not in range(0, 8):
             raise ValueError(f"num must be one of 0-7")
         self.register[0] = _ENCODER_REGISTER + 4 * num
         with self.device as bus:
@@ -50,7 +54,7 @@ class Unit8Encoder:
             for enc_num in range(8):
                 self.register[0] = _ENCODER_REGISTER + enc_num * 4
                 bus.write(self.register)
-                bus.readinto(self.buffer, start=enc_num*4, end=(enc_num+1)*4)
+                bus.readinto(self.buffer, start=enc_num * 4, end=(enc_num + 1) * 4)
         return struct.unpack("<8l", self.buffer)
 
     def read_increment(self, num):
@@ -58,7 +62,7 @@ class Unit8Encoder:
         Return the value of one encoder increment.
         This value is reset to 0 after read.
         """
-        if num not in range(0,8):
+        if num not in range(0, 8):
             raise ValueError(f"num must be one of 0-7")
         self.register[0] = _INCREMENT_REGISTER + 4 * num
         with self.device as bus:
@@ -75,7 +79,7 @@ class Unit8Encoder:
             for enc_num in range(8):
                 self.register[0] = _INCREMENT_REGISTER + enc_num * 4
                 bus.write(self.register)
-                bus.readinto(self.buffer, start=enc_num*4, end=(enc_num+1)*4)
+                bus.readinto(self.buffer, start=enc_num * 4, end=(enc_num + 1) * 4)
         return struct.unpack("<8l", self.buffer)
 
     def reset(self):
@@ -92,12 +96,12 @@ class Unit8Encoder:
             for bnum in range(8):
                 self.register[0] = 0x50 + bnum
                 bus.write(self.register)
-                bus.readinto(self.buffer, start=bnum, end=bnum+1)
+                bus.readinto(self.buffer, start=bnum, end=bnum + 1)
         return tuple(not b for b in struct.unpack("<8B", self.buffer[:8]))
 
     def set_led(self, position, color):
         """Set the color to one RGB LED"""
-        if position not in range(0,8):
+        if position not in range(0, 8):
             raise ValueError(f"pixel position must be one of 0-7")
         register = _PIXELS_REGISTER + 3 * position
         if isinstance(color, (tuple, list)) and len(color) == 3:
@@ -113,7 +117,7 @@ class Unit8Encoder:
 
     def get_led(self, position):
         """Get the current color of an RGB LED"""
-        if position not in range(0,8):
+        if position not in range(0, 8):
             raise ValueError(f"pixel position must be one of 0-7")
         self.register[0] = _PIXELS_REGISTER + 3 * position
         with self.device as bus:
