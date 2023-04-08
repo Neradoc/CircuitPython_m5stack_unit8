@@ -36,7 +36,7 @@ while True:
             encoder.pixels.brightness = 0.2
         # press the first and last buttons to reset all positions to 0
         if buttons[0] and buttons[-1]:
-            encoder.reset_encoders()
+            encoder.reset()
         # press the second button from both sides to set all to cyan
         if buttons[1] and buttons[-2]:
             encoder.positions = [64] * 8

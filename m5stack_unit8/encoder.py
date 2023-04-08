@@ -103,7 +103,7 @@ class Unit8Encoder:
                 bus.readinto(self.buffer, start=num * 4, end=(num + 1) * 4)
         return struct.unpack("<8l", self.buffer)
 
-    def reset_encoders(self):
+    def reset(self):
         """Reset the encoder position values"""
         self.buffer[1] = 1
         with self.device as bus:
