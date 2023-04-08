@@ -1,41 +1,58 @@
-from m5stack_unit8.encoder import Unit8Encoder
-from rainbowio import colorwheel
-
 import board
 import time
+from m5stack_unit8.encoder import Unit8Encoder
+from rainbowio import colorwheel
 
 i2c = board.STEMMA_I2C()
 encoder = Unit8Encoder(i2c, brightness=0.2)
 
 state = None
-button_status = [True] * 8
-led_status = [True] * 8
+pressed = set()
 
 while True:
-    positions = encoder.encoders
+    # get all the status from the device
+    positions = encoder.positions
     increments = encoder.increments
     buttons = encoder.buttons
     switch = encoder.switch
+    # if anything changed
     if (positions, increments, buttons, switch) != state:
         state = (positions, increments, buttons, switch)
-        print("-" * 70)
-        print(positions)
-        print(increments)
-        print(buttons, switch)
+        # print current state
+        print("-" * (13 + 8 * 5))
+        print(" Position:", "".join(f"{p:>5}" for p in positions), "|")
+        print("Increment:", "".join(f"{p:>5}" for p in increments), "|")
+        print(
+            "   Button:",
+            "".join(["   on" if b else "  off" for b in buttons]),
+            "|",
+            "on " if switch else "off",
+        )
+        print("-" * (13 + 8 * 5))
+        # use the switch to set the brightness
         if switch:
             encoder.pixels.brightness = 1
         else:
             encoder.pixels.brightness = 0.2
+        # press the first and last buttons to reset all positions to 0
         if buttons[0] and buttons[-1]:
             encoder.reset_encoders()
+        # press the second button from both sides to set all to cyan
+        if buttons[1] and buttons[-2]:
+            encoder.positions = [64] * 8
+        # use the pressed set to detect presses and releases
+        # set an encoder's position to 0 when pressed
         for i in range(8):
-            if button_status[i] != buttons[i]:
-                button_status[i] = buttons[i]
-                if buttons[i]:
-                    led_status[i] = not led_status[i]
-        colors = [
-            int(led_status[i]) * colorwheel((2 * x) % 256 + 256)
-            for i, x in enumerate(positions)
-        ]
+            if buttons[i] and i not in pressed:
+                # button i pressed
+                encoder.set_position(i, 0)
+                pressed.add(i)
+            if not buttons[i] and i in pressed:
+                # button i released
+                pressed.remove(i)
+        # compute the colors on a double scale to make it change faster
+        # note: some math to avoid feeding negative values to colorwheel
+        colors = [colorwheel((2 * x) % 256 + 256) for i, x in enumerate(positions)]
+        # set the pixels colors
         encoder.pixels[:] = colors
     time.sleep(0.1)

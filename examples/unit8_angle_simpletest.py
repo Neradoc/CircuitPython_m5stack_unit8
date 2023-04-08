@@ -13,21 +13,32 @@ button_status = [True] * 8
 led_status = [True] * 8
 
 while True:
-    # this is the 12 bits positions
+    # this is the 12 bits positions by default, adjusted to 16 bits
     positions = angles.angles
     # read 8 bit angles, hopefully more stable
-    positions_8b = angles.angles_8bits
+    positions_8b = angles.angles_8bit
+    # switch
     switch = angles.switch
+    # if anything changed
     if (positions_8b, switch) != state:
         state = (positions_8b, switch)
-        print("-" * 70)
-        print(positions, switch)
+        # print the values as percentages
+        print("-" * (9 + 8 * 5))
+        print(
+            "Angle:",
+            "".join(f"{100 - round(p * 100 / 0xFFFF):>4d}%" for p in positions),
+            "|",
+            "on " if switch else "off",
+        )
+        print("-" * (9 + 8 * 5))
+        # use the switch to set the brightness
         if switch:
             angles.pixels.brightness = 1
         else:
             angles.pixels.brightness = 0.2
-        # colors_12b = [colorwheel((256 * x) // 4096) for x in positions]
+        # use the 8-bit values to set the color, they are already in the range
         colors = [colorwheel(x) for x in positions_8b]
+        # got some errors during tests, but it seems stable now
         try:
             angles.pixels[:] = colors
         except OSError as er:

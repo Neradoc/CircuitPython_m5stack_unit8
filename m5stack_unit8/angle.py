@@ -58,10 +58,10 @@ class Unit8Angle:
         Return the value of one encoder.
         Values are adjusted to be 16 bits: 0-65535.
         """
-        if self._precision == PRECISION_8BITS
-            return (self.get_8bit_angle(num) * 0xFFFF) // 0xFF
+        if self._precision == PRECISION_8BITS:
+            return (self.get_angle_8bit(num) * 0xFFFF) // 0xFF
         else:
-            return (self.get_12bit_angle(num) * 0xFFFF) // 0xFFF
+            return (self.get_angle_12bit(num) * 0xFFFF) // 0xFFF
 
     @property
     def angles(self):
@@ -69,7 +69,7 @@ class Unit8Angle:
         Return a list with the values of the 8 encoders.
         Values are adjusted to be 16 bits: 0-65535.
         """
-        if self._precision == PRECISION_8BITS
+        if self._precision == PRECISION_8BITS:
             return tuple((byte * 0xFFFF) // 0xFF for byte in self.angles_8bit)
         else:
             return tuple((byte * 0xFFFF) // 0xFFF for byte in self.angles_12bit)

@@ -38,8 +38,8 @@ class Unit8Encoder:
         self.buffer = bytearray(4 * 8)
         self.pixels = _U8_Pixels(self, brightness, auto_write)
 
-    def get_encoder(self, num):
-        """Return the value of one encoder"""
+    def get_position(self, num):
+        """Return the position of one encoder."""
         if num not in range(0, 8):
             raise ValueError(f"num must be one of 0-7")
         self.register[0] = _ENCODER_REGISTER + 4 * num
@@ -48,15 +48,34 @@ class Unit8Encoder:
             bus.readinto(self.buffer, end=4)
         return struct.unpack("<l", self.buffer[:4])[0]
 
-    @property
-    def encoders(self):
-        """Return a list with the values of the 8 encoders"""
+    def set_position(self, num, position):
+        """Set the position of one encoder."""
+        if num not in range(0, 8):
+            raise ValueError(f"num must be one of 0-7")
+        self.buffer[0] = _ENCODER_REGISTER + 4 * num
+        self.buffer[1:5] = struct.pack("<l", position)
         with self.device as bus:
-            for enc_num in range(8):
-                self.register[0] = _ENCODER_REGISTER + enc_num * 4
+            bus.write(self.buffer, end=5)
+
+    @property
+    def positions(self):
+        """A list with the values of the 8 encoders."""
+        with self.device as bus:
+            for num in range(8):
+                self.register[0] = _ENCODER_REGISTER + num * 4
                 bus.write(self.register)
-                bus.readinto(self.buffer, start=enc_num * 4, end=(enc_num + 1) * 4)
+                bus.readinto(self.buffer, start=num * 4, end=(num + 1) * 4)
         return struct.unpack("<8l", self.buffer)
+
+    @positions.setter
+    def positions(self, positions):
+        if len(positions) != 8:
+            raise ValueError("expected a list of 8 positions")
+        with self.device as bus:
+            for num in range(8):
+                self.buffer[0] = _ENCODER_REGISTER + num * 4
+                self.buffer[1:5] = struct.pack("<l", positions[num])
+                bus.write(self.buffer, end=5)
 
     def get_increment(self, num):
         """
@@ -78,10 +97,10 @@ class Unit8Encoder:
         These value is reset to 0 after read.
         """
         with self.device as bus:
-            for enc_num in range(8):
-                self.register[0] = _INCREMENT_REGISTER + enc_num * 4
+            for num in range(8):
+                self.register[0] = _INCREMENT_REGISTER + num * 4
                 bus.write(self.register)
-                bus.readinto(self.buffer, start=enc_num * 4, end=(enc_num + 1) * 4)
+                bus.readinto(self.buffer, start=num * 4, end=(num + 1) * 4)
         return struct.unpack("<8l", self.buffer)
 
     def reset_encoders(self):
