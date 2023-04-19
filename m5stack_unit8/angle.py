@@ -26,7 +26,7 @@ class _U8_Pixels(PixelBuf):
     def __init__(self, unit8, brightness, auto_write):
         self.unit8 = unit8
         super().__init__(
-            8, byteorder="RGB", brightness=brightness, auto_write=auto_write
+            9, byteorder="RGB", brightness=brightness, auto_write=auto_write
         )
 
     def _transmit(self, buffer: bytearray) -> None:
@@ -92,6 +92,7 @@ class Unit8Angle:
                 self.register[0] = _ANGLE_12BITS_REGISTER + num * 2
                 bus.write(self.register)
                 bus.readinto(self.buffer, start=num * 2, end=(num + 1) * 2)
+                time.sleep(0.0008)
         return struct.unpack("<8H", self.buffer)
 
     def get_angle_8bit(self, num):
@@ -112,6 +113,7 @@ class Unit8Angle:
                 self.register[0] = _ANGLE_8BITS_REGISTER + num
                 bus.write(self.register)
                 bus.readinto(self.buffer, start=num, end=num + 1)
+                time.sleep(0.0008)
         return struct.unpack("<8B", self.buffer[:8])
 
     @property
@@ -123,10 +125,12 @@ class Unit8Angle:
             bus.readinto(self.buffer, end=1)
         return bool(self.buffer[0])
 
-    def set_led(self, position, color, brightness=0xFF):
+    def set_led(self, position, color, brightness=100):
         """Set the color to one RGB LED"""
-        if position not in range(0, 8):
-            raise ValueError(f"pixel position must be one of 0-7")
+        if position not in range(0, 9):
+            raise ValueError(f"pixel position must be one of 0-8")
+        if not (0 <= brightness <= 100):
+            raise ValueError(f"brightness must be 0-100")
         if isinstance(color, (tuple, list)) and len(color) == 3:
             color = bytes(color)
         elif isinstance(color, int):
@@ -141,8 +145,8 @@ class Unit8Angle:
 
     def get_led(self, position):
         """Get the current color of an RGB LED"""
-        if position not in range(0, 8):
-            raise ValueError(f"pixel position must be one of 0-7")
+        if position not in range(0, 9):
+            raise ValueError(f"pixel position must be one of 0-8")
         self.register[0] = _PIXELS_REGISTER + 4 * position
         with self.device as bus:
             bus.write(self.register)
@@ -151,7 +155,7 @@ class Unit8Angle:
 
     def _set_leds(self, buffer):
         """Set all LEDs with a binary buffer"""
-        for led in range(8):
+        for led in range(9):
             self.buffer[0] = _PIXELS_REGISTER + led * 4
             self.buffer[1:4] = buffer[led * 3 : (led + 1) * 3]
             self.buffer[4] = 0xFF
@@ -159,7 +163,7 @@ class Unit8Angle:
                 bus.write(self.buffer, end=6)
             time.sleep(0.0008)
 
-    def fill(self, color, brightness=0xFF):
-        for i in range(8):
+    def fill(self, color, brightness=100):
+        for i in range(9):
             self.set_led(i, color, brightness)
             time.sleep(0.0008)

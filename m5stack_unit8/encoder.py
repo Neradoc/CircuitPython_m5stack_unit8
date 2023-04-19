@@ -23,7 +23,7 @@ class _U8_Pixels(PixelBuf):
     def __init__(self, unit8, brightness, auto_write):
         self.unit8 = unit8
         super().__init__(
-            8, byteorder="RGB", brightness=brightness, auto_write=auto_write
+            9, byteorder="RGB", brightness=brightness, auto_write=auto_write
         )
 
     def _transmit(self, buffer: bytearray) -> None:
@@ -132,8 +132,8 @@ class Unit8Encoder:
 
     def set_led(self, position, color):
         """Set the color to one RGB LED"""
-        if position not in range(0, 8):
-            raise ValueError(f"pixel position must be one of 0-7")
+        if position not in range(0, 9):
+            raise ValueError(f"pixel position must be one of 0-8")
         register = _PIXELS_REGISTER + 3 * position
         if isinstance(color, (tuple, list)) and len(color) == 3:
             color = bytes(color)
@@ -148,8 +148,8 @@ class Unit8Encoder:
 
     def get_led(self, position):
         """Get the current color of an RGB LED"""
-        if position not in range(0, 8):
-            raise ValueError(f"pixel position must be one of 0-7")
+        if position not in range(0, 9):
+            raise ValueError(f"pixel position must be one of 0-8")
         self.register[0] = _PIXELS_REGISTER + 3 * position
         with self.device as bus:
             bus.write(self.register)

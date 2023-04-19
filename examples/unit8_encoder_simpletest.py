@@ -32,8 +32,10 @@ while True:
         # use the switch to set the brightness
         if switch:
             encoder.pixels.brightness = 1
+            encoder.pixels[8] = 0x00FF00
         else:
             encoder.pixels.brightness = 0.2
+            encoder.pixels[8] = 0xFF0000
         # press the first and last buttons to reset all positions to 0
         if buttons[0] and buttons[-1]:
             encoder.reset()
@@ -54,5 +56,5 @@ while True:
         # note: some math to avoid feeding negative values to colorwheel
         colors = [colorwheel((2 * x) % 256 + 256) for i, x in enumerate(positions)]
         # set the pixels colors
-        encoder.pixels[:] = colors
-    time.sleep(0.1)
+        encoder.pixels[:8] = colors
+    time.sleep(0.01)

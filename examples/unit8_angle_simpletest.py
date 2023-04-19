@@ -34,13 +34,15 @@ while True:
         # use the switch to set the brightness
         if switch:
             angles.pixels.brightness = 1
+            angles.pixels[8] = 0x00FF00
         else:
             angles.pixels.brightness = 0.2
+            angles.pixels[8] = 0xFF0000
         # use the 8-bit values to set the color, they are already in the range
         colors = [colorwheel(x) for x in positions_8b]
         # got some errors during tests, but it seems stable now
         try:
-            angles.pixels[:] = colors
+            angles.pixels[:8] = colors
         except OSError as er:
             print(er)
-    time.sleep(0.1)
+    time.sleep(0.01)
