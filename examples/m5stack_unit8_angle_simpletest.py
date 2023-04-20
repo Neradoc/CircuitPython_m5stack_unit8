@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2023 Neradoc https://neradoc.me
+# SPDX-License-Identifier: Unlicense
+
 from m5stack_unit8.angle import Unit8Angle
 from rainbowio import colorwheel
 

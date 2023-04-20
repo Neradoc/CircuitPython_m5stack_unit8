@@ -1,16 +1,42 @@
-# SPDX-FileCopyrightText: Copyright 2023 Neradoc, https://neradoc.me
+# SPDX-FileCopyrightText: Copyright (c) 2023 Neradoc https://neradoc.me
+#
 # SPDX-License-Identifier: MIT
-
 """
-Dev notes: the board expects a stop between writ and read rather than a real restart,
+`m5stack_unit8`
+================================================================================
+
+Library for M5Stack's Unit8 Encoder and Unit8 Angle breakouts.
+
+
+* Author(s): Neradoc
+
+Implementation Notes
+--------------------
+
+Dev notes: the board expects a stop between write and read rather than a real restart,
 so we cannot use "write_then_readinto", but a write followed by a read.
+
+**Hardware:**
+
+* M5Stack 8-Angle Unit with Potentiometer: https://shop.m5stack.com/products/8-angle-unit-with-potentiometer
+
+**Software and Dependencies:**
+
+* Adafruit CircuitPython firmware for the supported boards:
+  https://circuitpython.org/downloads
+
+* Adafruit's Bus Device library: https://github.com/adafruit/Adafruit_CircuitPython_BusDevice
+* Adafruit's Register library: https://github.com/adafruit/Adafruit_CircuitPython_Register
 """
 
+import struct
 import time
 from micropython import const
 from adafruit_bus_device.i2c_device import I2CDevice
-import struct
 from adafruit_pixelbuf import PixelBuf
+
+__version__ = "0.0.0+auto.0"
+__repo__ = "https://github.com/Neradoc/CircuitPython_m5stack_unit8.git"
 
 _DEFAULT_ADDRESS = const(0x43)
 _ANGLE_12BITS_REGISTER = const(0x00)

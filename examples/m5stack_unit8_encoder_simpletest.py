@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Copyright (c) 2023 Neradoc https://neradoc.me
+# SPDX-License-Identifier: Unlicense
+
 import board
 import time
 from m5stack_unit8.encoder import Unit8Encoder
