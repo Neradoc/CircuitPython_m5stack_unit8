@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MIT
 """
-`m5stack_unit8`
+`m5stack_unit8.angle`
 ================================================================================
 
 Library for M5Stack's Unit8 Encoder and Unit8 Angle breakouts.

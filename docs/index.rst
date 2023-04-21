@@ -21,17 +21,14 @@ Table of Contents
 
     api
 
-.. toctree::
-    :caption: Tutorials
-
-.. todo:: Add any Learn guide links here. If there are none, then simply delete this todo and leave
-    the toctree above for use later.
 
 .. toctree::
     :caption: Related Products
 
-.. todo:: Add any product links here. If there are none, then simply delete this todo and leave
-    the toctree above for use later.
+    M5Stack 8-Encoder Unit (STM32F030) <https://shop.m5stack.com/products/8-encoder-unit-stm32f030>
+
+    M5Stack 8-Angle Unit with Potentiometer <https://shop.m5stack.com/products/8-angle-unit-with-potentiometer>
+
 
 .. toctree::
     :caption: Other Links

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: Copyright 2023 Neradoc, https://neradoc.me
 # SPDX-License-Identifier: MIT
 """
-`m5stack_unit8`
+`m5stack_unit8.encoder`
 ================================================================================
 
 Library for M5Stack's Unit8 Encoder and Unit8 Angle breakouts.
