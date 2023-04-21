@@ -38,9 +38,7 @@ classifiers = [
 dynamic = ["dependencies", "optional-dependencies"]
 
 [tool.setuptools]
-# TODO: IF LIBRARY FILES ARE A PACKAGE FOLDER,
-#       CHANGE `py_modules = ['...']` TO `packages = ['...']`
-py-modules = ["m5stack_unit8"]
+packages = ["m5stack_unit8"]
 
 [tool.setuptools.dynamic]
 dependencies = {file = ["requirements.txt"]}
