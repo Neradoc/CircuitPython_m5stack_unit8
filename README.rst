@@ -2,8 +2,8 @@ Introduction
 ============
 
 
-.. image:: https://readthedocs.org/projects/circuitpython_m5stack_unit8/badge/?version=latest
-    :target: https://circuitpython_m5stack_unit8.readthedocs.io/
+.. image:: https://readthedocs.org/projects/m5stack-unit8-for-circuitpython/badge/?version=latest
+    :target: https://m5stack-unit8-for-circuitpython.readthedocs.io/
     :alt: Documentation Status
 
 
