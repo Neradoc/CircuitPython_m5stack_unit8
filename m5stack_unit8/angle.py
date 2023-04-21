@@ -48,6 +48,7 @@ PRECISION_8BITS = 8
 PRECISION_12BITS = 12
 PRECISIONS = (PRECISION_8BITS, PRECISION_12BITS)
 
+
 class _U8_Pixels(PixelBuf):
     def __init__(self, unit8, brightness, auto_write):
         self.unit8 = unit8
@@ -61,7 +62,14 @@ class _U8_Pixels(PixelBuf):
 
 
 class Unit8Angle:
-    def __init__(self, i2c, precision=PRECISION_12BITS, address=_DEFAULT_ADDRESS, brightness=1.0, auto_write=True):
+    def __init__(
+        self,
+        i2c,
+        precision=PRECISION_12BITS,
+        address=_DEFAULT_ADDRESS,
+        brightness=1.0,
+        auto_write=True,
+    ):
         self.device = I2CDevice(i2c, address)
         self.register = bytearray(1)
         self.buffer = bytearray(2 * 8)
