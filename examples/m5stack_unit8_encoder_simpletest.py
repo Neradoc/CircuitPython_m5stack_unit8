@@ -3,8 +3,8 @@
 
 import board
 import time
-from m5stack_unit8.encoder import Unit8Encoder
 from rainbowio import colorwheel
+from m5stack_unit8.encoder import Unit8Encoder
 
 i2c = board.STEMMA_I2C()
 encoder = Unit8Encoder(i2c, brightness=0.2)

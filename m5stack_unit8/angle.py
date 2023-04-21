@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: Copyright (c) 2023 Neradoc https://neradoc.me
-#
 # SPDX-License-Identifier: MIT
+#
+# pylint: disable=line-too-long, superfluous-parens, protected-access
+# pylint: disable=too-few-public-methods, too-many-arguments
 """
 `m5stack_unit8.angle`
 ================================================================================
@@ -50,6 +52,8 @@ PRECISIONS = (PRECISION_8BITS, PRECISION_12BITS)
 
 
 class _U8_Pixels(PixelBuf):
+    """Neopixels object."""
+
     def __init__(self, unit8, brightness, auto_write):
         self.unit8 = unit8
         super().__init__(
@@ -57,11 +61,13 @@ class _U8_Pixels(PixelBuf):
         )
 
     def _transmit(self, buffer: bytearray) -> None:
-        """Update the pixels"""
+        """Update the pixels."""
         self.unit8._set_leds(buffer)
 
 
 class Unit8Angle:
+    """Driver for the Unit8 8-potentiometers board."""
+
     def __init__(
         self,
         i2c,
@@ -79,6 +85,7 @@ class Unit8Angle:
 
     @property
     def precision(self):
+        """Bits precision of the potentiometer range. 8 or 12."""
         return self._precision
 
     @precision.setter
@@ -94,8 +101,8 @@ class Unit8Angle:
         """
         if self._precision == PRECISION_8BITS:
             return (self.get_angle_8bit(num) * 0xFFFF) // 0xFF
-        else:
-            return (self.get_angle_12bit(num) * 0xFFFF) // 0xFFF
+        # else:
+        return (self.get_angle_12bit(num) * 0xFFFF) // 0xFFF
 
     @property
     def angles(self):
@@ -105,13 +112,13 @@ class Unit8Angle:
         """
         if self._precision == PRECISION_8BITS:
             return tuple((byte * 0xFFFF) // 0xFF for byte in self.angles_8bit)
-        else:
-            return tuple((byte * 0xFFFF) // 0xFFF for byte in self.angles_12bit)
+        # else:
+        return tuple((byte * 0xFFFF) // 0xFFF for byte in self.angles_12bit)
 
     def get_angle_12bit(self, num):
         """Return the raw 12 bits value (0-4095) of one encoder"""
         if num not in range(0, 8):
-            raise ValueError(f"num must be one of 0-7")
+            raise ValueError("num must be one of 0-7")
         self.register[0] = _ANGLE_12BITS_REGISTER + num * 2
         with self.device as bus:
             bus.write(self.register)
@@ -132,7 +139,7 @@ class Unit8Angle:
     def get_angle_8bit(self, num):
         """Return the raw 8 bits value (0-255) of one encoder"""
         if num not in range(0, 8):
-            raise ValueError(f"num must be one of 0-7")
+            raise ValueError("num must be one of 0-7")
         self.register[0] = _ANGLE_8BITS_REGISTER + num
         with self.device as bus:
             bus.write(self.register)
@@ -162,9 +169,9 @@ class Unit8Angle:
     def set_led(self, position, color, brightness=100):
         """Set the color to one RGB LED"""
         if position not in range(0, 9):
-            raise ValueError(f"pixel position must be one of 0-8")
+            raise ValueError("pixel position must be one of 0-8")
         if not (0 <= brightness <= 100):
-            raise ValueError(f"brightness must be 0-100")
+            raise ValueError("brightness must be 0-100")
         if isinstance(color, (tuple, list)) and len(color) == 3:
             color = bytes(color)
         elif isinstance(color, int):
@@ -180,7 +187,7 @@ class Unit8Angle:
     def get_led(self, position):
         """Get the current color of an RGB LED"""
         if position not in range(0, 9):
-            raise ValueError(f"pixel position must be one of 0-8")
+            raise ValueError("pixel position must be one of 0-8")
         self.register[0] = _PIXELS_REGISTER + 4 * position
         with self.device as bus:
             bus.write(self.register)
@@ -195,9 +202,4 @@ class Unit8Angle:
             self.buffer[4] = 0xFF
             with self.device as bus:
                 bus.write(self.buffer, end=6)
-            time.sleep(0.0008)
-
-    def fill(self, color, brightness=100):
-        for i in range(9):
-            self.set_led(i, color, brightness)
             time.sleep(0.0008)

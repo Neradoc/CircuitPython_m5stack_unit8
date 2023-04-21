@@ -1,11 +1,10 @@
 # SPDX-FileCopyrightText: Copyright (c) 2023 Neradoc https://neradoc.me
 # SPDX-License-Identifier: Unlicense
 
-from m5stack_unit8.angle import Unit8Angle
-from rainbowio import colorwheel
-
 import board
 import time
+from rainbowio import colorwheel
+from m5stack_unit8.angle import Unit8Angle
 
 i2c = board.STEMMA_I2C()
 angles = Unit8Angle(i2c, brightness=0.2)
